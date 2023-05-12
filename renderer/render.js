@@ -1,14 +1,17 @@
-
+//Get area for file drop
 const holder = document.querySelector('#holder');
+const holderContainer = document.querySelector('#holder-container');
+//Get container for svg
 const container = document.querySelector('#svg-container');
+//Access linear gradient of folders logo
 let gradient;
 
+//Fetch external svg and inject into document
 fetch('./images/folders.svg')
     .then(response => response.text())
     .then(svgText => {
         container.innerHTML = svgText;
         gradient = document.getElementById('gradient');
-        console.log(gradient)
     })
 
 function isFileImage(file) {
@@ -46,20 +49,22 @@ holder.addEventListener('drop', (e)=> {
     e.preventDefault();
     e.stopPropagation();
     const folderPath = e.dataTransfer.items[0].getAsFile().path;
-      console.log(folderPath);
+    console.log(folderPath);
     ipcRenderer.send('folder:dropped', folderPath)
 })
+
 holder.addEventListener('dragover', (e) => {
     e.preventDefault();
     e.stopPropagation();  
   });
 
 holder.addEventListener('dragenter', (e)=> { 
-    console.log('entered');
+    holderContainer.classList.add('border', 'border-5')
 });
 
 holder.addEventListener("dragleave", (e) => {
     console.log('left');
+    holderContainer.classList.remove('border', 'border-5')
   });
 
 function animateIcon () {
