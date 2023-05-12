@@ -1,4 +1,15 @@
+
 const holder = document.querySelector('#holder');
+const container = document.querySelector('#svg-container');
+let gradient;
+
+fetch('./images/folders.svg')
+    .then(response => response.text())
+    .then(svgText => {
+        container.innerHTML = svgText;
+        gradient = document.getElementById('gradient');
+        console.log(gradient)
+    })
 
 function isFileImage(file) {
     const acceptedImageTypes = ['image/heic'];
@@ -50,3 +61,35 @@ holder.addEventListener('dragenter', (e)=> {
 holder.addEventListener("dragleave", (e) => {
     console.log('left');
   });
+
+function animateIcon () {
+    let up = true;
+    let down = false;
+    
+    const checkAmount = (attribute) => {
+      let amount = parseFloat(gradient.getAttribute(attribute));
+       if(amount == 100){
+        up = false;
+        down = true
+      }
+      if(amount == 0){
+        up = true;
+        down = false;
+      }
+      if(up){
+        amount += 10;
+      } else if (down) {
+        amount -= 10;
+      }
+      gradient.setAttribute(attribute, `${amount}%`);
+    }
+    
+    setInterval(()=> {
+      // checkAmount('x1');
+      checkAmount('y1');
+      checkAmount('x2');
+      // checkAmount('y2');
+    }, 100); 
+}
+
+window.onload=()=> animateIcon()
