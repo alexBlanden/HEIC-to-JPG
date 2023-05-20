@@ -1,3 +1,4 @@
+
 //Get area for file drop
 const holder = document.querySelector('#holder');
 const holderContainer = document.querySelector('#holder-container');
@@ -5,6 +6,7 @@ const holderContainer = document.querySelector('#holder-container');
 const container = document.querySelector('#svg-container');
 //Access linear gradient of folders logo
 let gradient;
+let animateInterval;
 
 //Fetch external svg and inject into document
 fetch('./images/folders.svg')
@@ -13,11 +15,6 @@ fetch('./images/folders.svg')
         container.innerHTML = svgText;
         gradient = document.getElementById('gradient');
     })
-
-function isFileImage(file) {
-    const acceptedImageTypes = ['image/heic'];
-    return file && acceptedImageTypes.includes(file['type'])
-}
 
 function alertError (message) {
     Toastify.toast({
@@ -51,6 +48,7 @@ holder.addEventListener('drop', (e)=> {
     const folderPath = e.dataTransfer.items[0].getAsFile().path;
     console.log(folderPath);
     ipcRenderer.send('folder:dropped', folderPath)
+    animateIcon();
 })
 
 holder.addEventListener('dragover', (e) => {
@@ -63,8 +61,11 @@ holder.addEventListener('dragenter', (e)=> {
 });
 
 holder.addEventListener("dragleave", (e) => {
-    console.log('left');
-    holderContainer.classList.remove('border', 'border-5')
+    if(!holder.contains(e.relatedTarget)){
+      console.log('left');
+      holderContainer.classList.remove('border', 'border-5')
+    }
+    
   });
 
 function animateIcon () {
@@ -89,12 +90,17 @@ function animateIcon () {
       gradient.setAttribute(attribute, `${amount}%`);
     }
     
-    setInterval(()=> {
+    animateInterval = setInterval(()=> {
       // checkAmount('x1');
       checkAmount('y1');
       checkAmount('x2');
       // checkAmount('y2');
     }, 100); 
 }
-
-window.onload=()=> animateIcon()
+function stopIcon () {
+  clearInterval(animateInterval);
+}
+ipcRenderer.on('images:done', ()=> {
+  stopIcon()
+  console.log('stopped')
+})

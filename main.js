@@ -11,6 +11,8 @@ const isMac = process.platform === "darwin";
 let mainWindow;
 let aboutWindow;
 
+let counter = 0;
+
 function createMainWindow() {
     mainWindow = new BrowserWindow({
         title: "Image Resizer",
@@ -33,7 +35,7 @@ function createMainWindow() {
 
 function creatAboutWindow () {
     aboutWindow = new BrowserWindow({
-        title: "About Image Resizer",
+        title: "About Image Converter",
         width: 300,
         height: 300,
     });
@@ -89,23 +91,54 @@ const menu = [
     ] : [])
 ]
 
-ipcMain.on('folder:dropped', (e, folderPath)=> {
-    fs.readdir(folderPath, (err, files)=> {
-        if(err){
-            console.log(err);
-            return
-        }
-        let counter = 0;
-        console.log(files)
-        files.forEach(file => {
-            convertToJpeg(folderPath, file, counter)
-            counter++
-        })
-    })
-    mainWindow.webContents.send('image:done');
-})
 
-async function convertToJpeg (path, file, counter) {
+function fileIsHeic(file) {
+    const extension = file.toLowerCase().substring(file.lastIndexOf('.'));
+    return extension === '.heic';
+}
+function fileIsJpg(file) {
+    const extension = file.toLowerCase().substring(file.lastIndexOf('.'));
+    return extension === '.jpg';
+}
+
+ipcMain.on('folder:dropped', (e, folderPath) => {
+    fs.readdir(folderPath, (err, files) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      let numberOfHeic = files.filter(file => fileIsHeic(file));
+      console.log(numberOfHeic.length);
+      console.log(files);
+      let counter = 0; // Initialize the counter variable
+      files.forEach(file => {
+        if (fileIsHeic(file)) {
+          convertToJpeg(folderPath, file);
+          console.log(counter);
+        }
+      });
+      // convertToJpeg is asynchronous, 'if' statement ensures 'images:done' is sent after all files are converted
+      if (counter === numberOfHeic.length) {
+        mainWindow.webContents.send('images:done');
+      }
+    });
+  });
+  
+//   async function convertToJpeg(path, file, counter) {
+//     try {
+//       const inputBuffer = await promisify(fs.readFile)(`${path}\\${file}`);
+//       const outputBuffer = await convert({
+//         buffer: inputBuffer,
+//         format: 'JPEG',
+//         quality: 1
+//       });
+//       await promisify(fs.writeFile)(`${path}/${file}-${counter}.jpg`, outputBuffer);
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   }
+
+async function convertToJpeg (path, file) {
     try {
         const inputBuffer = await promisify(fs.readFile)(`${path}\\${file}`);
         const outputBuffer = await convert({
@@ -113,8 +146,7 @@ async function convertToJpeg (path, file, counter) {
         format: 'JPEG',
         quality: 1      
         });
-        await promisify(fs.writeFile)(`${path}/${file}-${counter}.jpg`, outputBuffer)
-        counter++;
+        await promisify(fs.writeFile)(`${path}/${file}-${counter}.jpg`, outputBuffer).then(counter++);
     } catch (error) {
         console.log(error)
     }
