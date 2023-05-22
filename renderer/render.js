@@ -1,4 +1,3 @@
-
 //Get area for file drop
 const holder = document.querySelector('#holder');
 const holderContainer = document.querySelector('#holder-container');
@@ -7,6 +6,10 @@ const container = document.querySelector('#svg-container');
 //Access linear gradient of folders logo
 let gradient;
 let animateInterval;
+//Progress bar
+const progressBar = document.querySelector('.progress-bar');
+let progressWidth = parseInt(progressBar.style.width);
+
 
 //Fetch external svg and inject into document
 fetch('./images/folders.svg')
@@ -15,6 +18,20 @@ fetch('./images/folders.svg')
         container.innerHTML = svgText;
         gradient = document.getElementById('gradient');
     })
+ipcRenderer.on('progress', (percentPerFile)=> {
+  console.log(percentPerFile);
+  progressWidth += percentPerFile;
+  console.log(progressWidth)
+  progressBar.style.width = `${progressWidth}%`;
+  progressBar.innerText = `${progressWidth}%`;
+});
+
+ipcRenderer.on('images:done', ()=> {
+  stopIcon()
+  alertSuccess('Conversion Complete!')
+  progressBar.style.width = '0%';
+  progressBar.innerText = "0%"
+});
 
 function alertError (message) {
     Toastify.toast({
@@ -62,7 +79,6 @@ holder.addEventListener('dragenter', (e)=> {
 
 holder.addEventListener("dragleave", (e) => {
     if(!holder.contains(e.relatedTarget)){
-      console.log('left');
       holderContainer.classList.remove('border', 'border-5')
     }
     
@@ -100,7 +116,3 @@ function animateIcon () {
 function stopIcon () {
   clearInterval(animateInterval);
 }
-ipcRenderer.on('images:done', ()=> {
-  stopIcon()
-  console.log('stopped')
-})
