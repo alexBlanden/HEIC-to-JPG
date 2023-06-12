@@ -9,6 +9,8 @@ let animateInterval;
 //Progress bar
 const progressBar = document.querySelector('.progress-bar');
 let progressWidth = parseInt(progressBar.style.width);
+//User feedback
+const feedback = document.querySelector('#user-feedback');
 
 
 //Fetch external svg and inject into document
@@ -19,9 +21,7 @@ fetch('./images/folders.svg')
         gradient = document.getElementById('gradient');
     })
 ipcRenderer.on('progress', (percentPerFile)=> {
-  console.log(percentPerFile);
   progressWidth += percentPerFile;
-  console.log(progressWidth)
   progressBar.style.width = `${progressWidth}%`;
   progressBar.innerText = `${progressWidth}%`;
 });
@@ -31,6 +31,7 @@ ipcRenderer.on('images:done', ()=> {
   alertSuccess('Conversion Complete!')
   progressBar.style.width = '0%';
   progressBar.innerText = "0%"
+  feedback.innerText = 'Drop Your Folder To Convert';
 });
 
 function alertError (message) {
@@ -66,6 +67,7 @@ holder.addEventListener('drop', (e)=> {
     console.log(folderPath);
     ipcRenderer.send('folder:dropped', folderPath)
     animateIcon();
+    feedback.innerText = 'Converting. Please Wait.'
 })
 
 holder.addEventListener('dragover', (e) => {

@@ -11,3 +11,7 @@ figure.figure img {
     width: 50%;
     max-width: 200px;
 }
+
+.progress-bar {
+    background-color: #31c0e0;
+}

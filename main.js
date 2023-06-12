@@ -1,6 +1,7 @@
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const mime = require('mime-types');
 const { promisify } = require('util');
 const convert = require('heic-convert');
 const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
@@ -94,7 +95,8 @@ const menu = [
 
 function fileIsHeic(file) {
     const extension = file.toLowerCase().substring(file.lastIndexOf('.'));
-    return extension === '.heic';
+    const mimeType = mime.lookup(file)
+    return extension === '.heic' && mimeType === 'image/heic';
 }
 
 ipcMain.on('folder:dropped', async (e, folderPath) => {
@@ -105,7 +107,6 @@ ipcMain.on('folder:dropped', async (e, folderPath) => {
         }
         let numberOfHeic = files.filter(file => fileIsHeic(file));
         let percentPerFile = 100/numberOfHeic.length;
-        console.log(percentPerFile);
         let counter = 0; // Initialize the counter variable
         //convertToJpeg is aynchronous, counter must only increment once file conversion has finished:
         (async ()=> {
@@ -126,13 +127,20 @@ ipcMain.on('folder:dropped', async (e, folderPath) => {
 
 async function convertToJpeg (path, file) {
     try {
+        let outputPath = `${path}/${file}.jpg`;
+        let fileCounter = 1;
+
+        while(await promisify(fs.exists)(outputPath)){
+            outputPath = `${path}/${file}(${fileCounter}).jpg`;
+            counter++;
+        }
         const inputBuffer = await promisify(fs.readFile)(`${path}\\${file}`);
         const outputBuffer = await convert({
         buffer: inputBuffer,
         format: 'JPEG',
         quality: 1      
         });
-        await promisify(fs.writeFile)(`${path}/${file}-${counter}.jpg`, outputBuffer);
+        await promisify(fs.writeFile)(outputPath, outputBuffer);
     } catch (error) {
         console.log(error)
     }
