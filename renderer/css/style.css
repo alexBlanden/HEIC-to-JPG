@@ -2,7 +2,7 @@ html, body {
     height: 100%;
 }
 
-#parent {
+#parent, #about-parent {
     background-color: rgba(123, 183, 206, 0.3);
     height: 100vh;
   }

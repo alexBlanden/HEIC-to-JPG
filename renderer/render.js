@@ -3,6 +3,7 @@ const holder = document.querySelector('#holder');
 const holderContainer = document.querySelector('#holder-container');
 //Get container for svg
 const container = document.querySelector('#svg-container');
+
 //Access linear gradient of folders logo
 let gradient;
 let animateInterval;
@@ -30,7 +31,8 @@ ipcRenderer.on('images:done', ()=> {
   stopIcon()
   alertSuccess('Conversion Complete!')
   progressBar.style.width = '0%';
-  progressBar.innerText = "0%"
+  progressBar.innerText = "0%";
+  progressWidth = 0;
   feedback.innerText = 'Drop Your Folder To Convert';
 });
 
@@ -53,7 +55,7 @@ function alertSuccess(message) {
         duration: 5000,
         close: false,
         style: {
-            background: 'green',
+            background: '#04a2ba',
             color: 'white',
             textAlign: 'center'
         }
@@ -64,7 +66,6 @@ holder.addEventListener('drop', (e)=> {
     e.preventDefault();
     e.stopPropagation();
     const folderPath = e.dataTransfer.items[0].getAsFile().path;
-    console.log(folderPath);
     ipcRenderer.send('folder:dropped', folderPath)
     animateIcon();
     feedback.innerText = 'Converting. Please Wait.'

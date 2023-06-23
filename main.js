@@ -1,5 +1,4 @@
 const path = require('path');
-const os = require('os');
 const fs = require('fs');
 const mime = require('mime-types');
 const { promisify } = require('util');
@@ -94,47 +93,60 @@ const menu = [
 
 
 function fileIsHeic(file) {
-    const extension = file.toLowerCase().substring(file.lastIndexOf('.'));
-    const mimeType = mime.lookup(file)
+    // const extension = file.toLowerCase().substring(file.lastIndexOf('.'));
+    const extension = path.parse(file).ext.toLowerCase()
+    console.log(extension)
+    const mimeType = mime.lookup(file);
     return extension === '.heic' && mimeType === 'image/heic';
 }
 
 ipcMain.on('folder:dropped', async (e, folderPath) => {
-    fs.readdir(folderPath, (err, files) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        let numberOfHeic = files.filter(file => fileIsHeic(file));
-        let percentPerFile = 100/numberOfHeic.length;
-        let counter = 0; // Initialize the counter variable
-        //convertToJpeg is aynchronous, counter must only increment once file conversion has finished:
-        (async ()=> {
-            for(const file of files) {
-                if(fileIsHeic(file)){
-                    await convertToJpeg(folderPath, file);
-                    counter++;
-                    mainWindow.webContents.send('progress', percentPerFile);
+    try{
+        fs.readdir(folderPath, (err, files) => {
+            if (err) {
+                console.log(`Error! ${err}`);
+                return;
+            }
+            let numberOfHeic = files.filter(file => fileIsHeic(file));
+            console.log(`There are ${numberOfHeic.length} heic files and they are ${numberOfHeic}`);
+            let percentPerFile = 100/numberOfHeic.length;
+            counter = 0; // Initialize the counter variable
+            //convertToJpeg is aynchronous, counter must only increment once file conversion has finished:
+            (async ()=> {
+                for(const file of numberOfHeic) {
+                    if(fileIsHeic(file)){
+                        await convertToJpeg(folderPath, file);
+                        counter++;
+                        mainWindow.webContents.send('progress', percentPerFile);
+                    }
+                    console.log(`file is ${file}, counter is ${counter}`)
                 }
-            }
-            if (counter === numberOfHeic.length) {
-                mainWindow.webContents.send('images:done');
-                shell.openPath(folderPath);
-            }
-        })();
-    });
+                if (counter === numberOfHeic.length) {
+                    mainWindow.webContents.send('images:done');
+                    shell.openPath(folderPath);
+                }
+            })();
+        });
+
+    } catch(e){
+        console.log(e)
+    }
 })
 
-async function convertToJpeg (path, file) {
+async function convertToJpeg (filePath, file) {
     try {
-        let outputPath = `${path}/${file}.jpg`;
+        const filename = path.parse(file).name
+        const outputPath = `${filePath}/${filename}.jpg`;
         let fileCounter = 1;
+        let newOutputPath = outputPath;
 
-        while(await promisify(fs.exists)(outputPath)){
-            outputPath = `${path}/${file}(${fileCounter}).jpg`;
-            counter++;
+        //Counter is appended to existing file name until newOutputPath = false (name doesn't exist)
+        while(await promisify(fs.exists)(newOutputPath)){
+            newOutputPath = `${filePath}/${filename}(${fileCounter}).jpg`;
+            fileCounter++;
         }
-        const inputBuffer = await promisify(fs.readFile)(`${path}\\${file}`);
+
+        const inputBuffer = await promisify(fs.readFile)(`${filePath}\\${file}`);
         const outputBuffer = await convert({
         buffer: inputBuffer,
         format: 'JPEG',
@@ -149,37 +161,4 @@ app.on('window-all-closed', ()=> {
     if(!isMac){
         app.quit()
     }
-})
-
-// async function resizeImage({imagePath, width, height, dest}) {
-//     //newPath is resized image data
-//     try{
-//         console.log(+width, +height)
-//         const newPath = await resizeImg(fs.readFileSync(imagePath), {
-//             width: +width,
-//             height: +height,
-//           });
-
-//         //extract filename from image path
-//         const fileName = path.basename(imagePath);
-
-//         //Does destination directory exist? If not make it!
-//         if(!fs.existsSync(dest)){
-//             fs.mkdirSync(dest)
-//         //    fs.makedirSync(dest); 
-//         }
-//         //Take resized image data and and write it to the destination directory 
-//         //path.join creates a path using the destination directory and the fileName
-//         //fs.writeFileSync uses the joined path as the destination and the newPath resized image data
-//         fs.writeFileSync(path.join(dest, fileName), newPath);
-
-//         //Send success to renderer
-//         mainWindow.webContents.send('image:done')
-
-//         //Open folder when done
-//         shell.openPath(dest);
-
-//     }catch(error){
-//         console.log(error)
-//     }
-// }
+});
