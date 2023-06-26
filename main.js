@@ -36,16 +36,23 @@ function createMainWindow() {
 function creatAboutWindow () {
     aboutWindow = new BrowserWindow({
         title: "About Image Converter",
-        width: 300,
+        width: 600,
         height: 300,
+        autoHideMenuBar: true,
+        webPreferences: {
+            preload: path.join(__dirname, '/renderer/aboutpreload.js')
+        }
     });
+    if(isDev){
+        aboutWindow.webContents.openDevTools();
+    }
+
     aboutWindow.loadFile(path.join(__dirname, "./renderer/about.html"));
 }
 
 
 app.whenReady().then(()=> {
     createMainWindow();
-    console.log('created')
 
     const mainMenu = Menu.buildFromTemplate(menu);
     Menu.setApplicationMenu(mainMenu);
@@ -68,14 +75,6 @@ const menu = [
         ]
     }] : []),
     {
-        // label: 'File',
-        // submenu: [
-        //     {
-        //         label: 'Quit',
-        //         click: () => app.quit(),
-        //         accelerator: 'CmdOrCtrl+W'
-        //     }
-        // ]
         role: 'fileMenu'
     },
     ...(!isMac ? [
@@ -93,9 +92,7 @@ const menu = [
 
 
 function fileIsHeic(file) {
-    // const extension = file.toLowerCase().substring(file.lastIndexOf('.'));
     const extension = path.parse(file).ext.toLowerCase()
-    console.log(extension)
     const mimeType = mime.lookup(file);
     return extension === '.heic' && mimeType === 'image/heic';
 }
@@ -108,7 +105,6 @@ ipcMain.on('folder:dropped', async (e, folderPath) => {
                 return;
             }
             let numberOfHeic = files.filter(file => fileIsHeic(file));
-            console.log(`There are ${numberOfHeic.length} heic files and they are ${numberOfHeic}`);
             let percentPerFile = 100/numberOfHeic.length;
             counter = 0; // Initialize the counter variable
             //convertToJpeg is aynchronous, counter must only increment once file conversion has finished:
@@ -119,7 +115,6 @@ ipcMain.on('folder:dropped', async (e, folderPath) => {
                         counter++;
                         mainWindow.webContents.send('progress', percentPerFile);
                     }
-                    console.log(`file is ${file}, counter is ${counter}`)
                 }
                 if (counter === numberOfHeic.length) {
                     mainWindow.webContents.send('images:done');
@@ -128,6 +123,16 @@ ipcMain.on('folder:dropped', async (e, folderPath) => {
             })();
         });
 
+    } catch(e){
+        console.log(e)
+    }
+})
+
+ipcMain.on('linkClicked', (e, index)=> {
+    console.log(index)
+    const websites = ['https://github.com/alexBlanden?tab=repositories', 'https://alexblanden.co.uk/', 'https://www.linkedin.com/in/alex-blanden-681828222/'];
+    try {
+        shell.openExternal(websites[index]);
     } catch(e){
         console.log(e)
     }

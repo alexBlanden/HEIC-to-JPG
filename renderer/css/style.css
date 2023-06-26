@@ -15,3 +15,7 @@ figure.figure img {
 .progress-bar {
     background-color: #31c0e0;
 }
+
+.socials {
+   cursor: pointer;
+}

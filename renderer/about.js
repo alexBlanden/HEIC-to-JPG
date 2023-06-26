@@ -1,10 +1,10 @@
-const globeContainer = document.querySelector('#globe');
+const socials = document.querySelectorAll('.socials');
 
-fetch('./images/Globe_icon.svg')
-    .then(response => response.text())
-    .then(svgText => {
-      globeContainer.innerHTML = svgText;
+console.log(socials)
 
-      globeContainer.style.width = '10%'; // Set the desired width
-      globeContainer.style.height = '10%'; // Set the desired height
+socials.forEach(link => {
+    link.addEventListener('click', function(e) {
+        const index = parseInt(this.dataset.index)
+        ipcRenderer.send('linkClicked', index)
     })
+})
