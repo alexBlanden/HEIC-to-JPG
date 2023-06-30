@@ -57,6 +57,8 @@ app.whenReady().then(()=> {
     const mainMenu = Menu.buildFromTemplate(menu);
     Menu.setApplicationMenu(mainMenu);
 
+    mainWindow.on('closed', ()=> (mainWindow = null));
+
     app.on('activate', ()=> {
         if (BrowserWindow.getAllWindows().length === 0){
             createMainWindow()
@@ -129,8 +131,7 @@ ipcMain.on('folder:dropped', async (e, folderPath) => {
 })
 
 ipcMain.on('linkClicked', (e, index)=> {
-    console.log(index)
-    const websites = ['https://github.com/alexBlanden?tab=repositories', 'https://alexblanden.co.uk/', 'https://www.linkedin.com/in/alex-blanden-681828222/'];
+    const websites = ['https://github.com/alexBlanden?tab=repositories', 'https://alexblanden.co.uk/', 'https://www.linkedin.com/in/alex-blanden-681828222/', 'https://www.buymeacoffee.com/mewCP'];
     try {
         shell.openExternal(websites[index]);
     } catch(e){

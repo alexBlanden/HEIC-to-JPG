@@ -1,19 +1,28 @@
 {
   "name": "heic-to-jpg",
+  "productName": "HEIC to JPG Converter",
   "version": "1.0.0",
   "description": "Convert heic to jpg offline",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-builder"
   },
-  "author": "",
+  "author": "Alex Blanden",
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^5.3.0-alpha3",
-    "electron": "^24.2.0",
     "heic-convert": "^1.2.4",
     "mime-types": "^2.1.35",
     "toastify": "^2.0.1",
     "toastify-js": "^1.12.0"
+  },
+  "devDependencies": {
+    "electron": "^24.2.0",
+    "electron-builder": "^24.4.0"
+  },
+  "build": {
+    "appId": "uk.co.AlexBlanden.ImageConverter",
+    "icon": "./renderer/images/file.png"
   }
 }
