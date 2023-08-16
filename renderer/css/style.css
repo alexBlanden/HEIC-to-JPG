@@ -14,6 +14,7 @@ figure.figure img {
 
 .progress-bar {
     background-color: #31c0e0;
+    width: 0;
 }
 
 .socials {

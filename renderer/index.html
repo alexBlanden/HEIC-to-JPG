@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
     <title>Image Converter</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="render.js" defer></script>
 </head>
 <body>
@@ -16,13 +18,22 @@
                 <div class="col"></div>
                 <div class="col-5">
                     <div class="h-100 shadow-lg bg-body rounded d-flex flex-column justify-content-around" id="holder-container">
-                        <figure class="figure m-3" id="holder">
+                        <figure class="figure m-1" id="holder">
                             <div id="svg-container" class="figure-img img-fluid rounded"></div>
                             <figcaption class="figure-caption p-2"><h5 id="user-feedback">Drop Your Folder To Convert</h5></figcaption> 
                         </figure>
+                        <div class="dropdown pb-4">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                              Format
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                              <li class="dropdown-item" data-value="JPEG">JPEG</li>
+                              <li class="dropdown-item" data-value="PNG">PNG</li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="progress mt-3">
-                        <div class="progress-bar" role="progressbar" aria-label="Example with label" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar" id="progress-bar" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
                 <div class="col"></div>

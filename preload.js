@@ -1,12 +1,7 @@
-const os = require('os');
 const path = require('path')
 const Toastify = require('toastify-js')
 
-const { contextBridge, ipcRenderer, shell } = require('electron');
-
-contextBridge.exposeInMainWorld('os', {
-    homedir: ()=> os.homedir()
-})
+const { contextBridge, ipcRenderer, webFrame } = require('electron');
 
 contextBridge.exposeInMainWorld('path', {
     join: (...args)=> path.join(...args)
@@ -17,12 +12,8 @@ contextBridge.exposeInMainWorld('Toastify', {
 })
 
 contextBridge.exposeInMainWorld('ipcRenderer', {
-    send: (channel, data)=> ipcRenderer.send(channel, data),
+    send: (channel, ...args)=> ipcRenderer.send(channel, ...args),
     on: (channel, func)=> ipcRenderer.on(channel, (event, ...args)=>func(...args))
 })
 
-// let indexBridge = {
-//     openWebsite : async () => {
-//         await ipcRenderer.invoke("openWebsite");
-//     }
-// }
+webFrame.setContent

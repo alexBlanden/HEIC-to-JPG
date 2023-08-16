@@ -6,7 +6,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "package": "electron-builder"
+    "package": "node -e \"process.env.NODE_ENV='production';\" && electron-builder"
   },
   "author": "Alex Blanden",
   "license": "ISC",

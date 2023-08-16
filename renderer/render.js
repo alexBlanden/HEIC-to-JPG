@@ -1,3 +1,4 @@
+
 //Get area for file drop
 const holder = document.querySelector('#holder');
 const holderContainer = document.querySelector('#holder-container');
@@ -9,7 +10,25 @@ let gradient;
 let animateInterval;
 //Progress bar
 const progressBar = document.querySelector('.progress-bar');
-let progressWidth = parseInt(progressBar.style.width);
+const dropdownButton = document.getElementById("dropdownMenuButton1");
+let selectedFormat = 'JPEG';
+let progressWidth = window.getComputedStyle(progressBar).getPropertyValue('width');
+progressWidth = parseInt(progressWidth);
+
+document.addEventListener("DOMContentLoaded", function() {
+  const dropdownItems = document.querySelectorAll(".dropdown-item");
+
+  dropdownItems.forEach(item => {
+    item.addEventListener("click", function() {
+      selectedFormat = item.getAttribute("data-value");
+      dropdownItems.forEach(otherItem => {
+        otherItem.classList.remove("active");
+      });
+      dropdownButton.textContent = item.textContent;
+      this.classList.add("active");
+    });
+  });
+});
 //User feedback
 const feedback = document.querySelector('#user-feedback');
 
@@ -28,13 +47,21 @@ ipcRenderer.on('progress', (percentPerFile)=> {
 });
 
 ipcRenderer.on('images:done', ()=> {
-  stopIcon()
+  stopIcon();
   alertSuccess('Conversion Complete!')
   progressBar.style.width = '0%';
   progressBar.innerText = "0%";
   progressWidth = 0;
   feedback.innerText = 'Drop Your Folder To Convert';
 });
+ipcRenderer.on('directoryError', ()=> {
+  alertError('Error, data is not a folder. Please provide a folder.');
+  stopIcon();
+  progressBar.style.width = '0%';
+  progressBar.innerText = "0%";
+  progressWidth = 0;
+  feedback.innerText = 'Drop Your Folder To Convert';
+})
 
 function alertError (message) {
     Toastify.toast({
@@ -63,12 +90,13 @@ function alertSuccess(message) {
 }
 
 holder.addEventListener('drop', (e)=> {
-    e.preventDefault();
-    e.stopPropagation();
-    const folderPath = e.dataTransfer.items[0].getAsFile().path;
-    ipcRenderer.send('folder:dropped', folderPath)
-    animateIcon();
-    feedback.innerText = 'Converting. Please Wait.'
+  e.preventDefault();
+  e.stopPropagation();
+  const folderPath = e.dataTransfer.items[0].getAsFile().path;
+  console.log(selectedFormat)
+  ipcRenderer.send('folder:dropped', folderPath, selectedFormat);
+  animateIcon();
+  feedback.innerText = 'Converting. Please Wait.'
 })
 
 holder.addEventListener('dragover', (e) => {
