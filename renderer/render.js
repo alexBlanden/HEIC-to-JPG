@@ -11,6 +11,7 @@ let animateInterval;
 //Progress bar
 const progressBar = document.querySelector('.progress-bar');
 const dropdownButton = document.getElementById("dropdownMenuButton1");
+//Default format for file conversion.
 let selectedFormat = 'JPEG';
 let progressWidth = window.getComputedStyle(progressBar).getPropertyValue('width');
 progressWidth = parseInt(progressWidth);
@@ -53,6 +54,7 @@ ipcRenderer.on('images:done', ()=> {
   progressBar.innerText = "0%";
   progressWidth = 0;
   feedback.innerText = 'Drop Your Folder To Convert';
+  dropdownButton.classList.remove('disabled');
 });
 ipcRenderer.on('directoryError', ()=> {
   alertError('Error, data is not a folder. Please provide a folder.');
@@ -97,6 +99,7 @@ holder.addEventListener('drop', (e)=> {
   ipcRenderer.send('folder:dropped', folderPath, selectedFormat);
   animateIcon();
   feedback.innerText = 'Converting. Please Wait.'
+  dropdownButton.classList.add('disabled');
 })
 
 holder.addEventListener('dragover', (e) => {
