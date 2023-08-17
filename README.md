@@ -1,6 +1,8 @@
 # HEIC-to-JPG
-Convert HEIC to JPG offline
-#### About This App
+
+## Convert HEIC to JPG offline
+
+### About This App
 
 HEIC (High Efficiency Image Container) is a file format primarily used for images and commonly associated with Apple. However, support for this format is limited outside of Apple's ecosystem. While online converters are available, data protection laws and concern about unvetted third-party websites mean they're not always suitable.
 
